@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Stats Indicator Settings</title>
+</head>
+<body>
+  <label>
+    API Key:
+    <input type="text" id="apiKey" placeholder="Your Torn API key" />
+  </label><br/>
+
+  <label>
+    <input type="checkbox" id="showEnergy" checked />
+    Show Energy
+  </label><br/>
+
+  <label>
+    <input type="checkbox" id="showNerve" checked />
+    Show Nerve
+  </label><br/>
+
+  <button id="saveBtn">Save</button>
+
+  <script>
+    let ws, actionContext;
+
+    function connectElgatoStreamDeckSocket(port, pluginUUID, registerEvent, info, actionInfo) {
+      actionContext = actionInfo.context;
+      ws = new WebSocket(`ws://127.0.0.1:${port}`);
+
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ event: registerEvent, uuid: pluginUUID }));
+        ws.send(JSON.stringify({ event: "getSettings", context: actionContext }));
+      };
+
+      ws.onmessage = (evt) => {
+        const msg = JSON.parse(evt.data);
+        if (msg.event === "didReceiveSettings") {
+          const s = msg.payload.settings;
+          document.getElementById("apiKey").value      = s.apiKey      || "";
+          document.getElementById("showEnergy").checked = s.showEnergy ?? true;
+          document.getElementById("showNerve").checked  = s.showNerve  ?? true;
+        }
+      };
+    }
+
+    function saveSettings() {
+      ws.send(JSON.stringify({
+        event:   "setSettings",
+        context: actionContext,
+        payload: {
+          apiKey:     document.getElementById("apiKey").value,
+          showEnergy: document.getElementById("showEnergy").checked,
+          showNerve:  document.getElementById("showNerve").checked
+        }
+      }));
+    }
+
+    document.getElementById("saveBtn").addEventListener("click", saveSettings);
+  </script>
+</body>
+</html>
