@@ -7,7 +7,6 @@ import { renderRefillSvg } from "../torn/render-refills";
 
 type RefillsSettings = {
   refillType?: TornRefillType;
-  refreshSeconds?: number;
   flashEnabled?: boolean;
   longPressUrl?: string;
 };
