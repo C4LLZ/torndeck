@@ -43,6 +43,10 @@ export type TornCooldownType = "drug" | "booster" | "medical";
 
 export type TornCooldowns = Record<TornCooldownType, number>;
 
+export type TornRefillType = "energy" | "nerve";
+
+export type TornRefills = Record<TornRefillType, boolean>;
+
 export type TornTravelMethod = "Airstrip" | "Business" | "Private" | "Standard";
 
 export interface TornTravel {
@@ -101,6 +105,7 @@ const BARS_NOTIFICATIONS_TTL_MS = 15_000;
 const TRAVEL_TTL_MS = 15_000;
 const BASIC_TTL_MS = 25_000;
 const COOLDOWNS_TTL_MS = 15_000;
+const REFILLS_TTL_MS = 55_000;
 
 interface RawBar {
   current?: number;
@@ -219,6 +224,21 @@ export async function fetchTornCooldowns(apiKey: string): Promise<TornCooldowns>
     drug: d.cooldowns?.drug ?? 0,
     booster: d.cooldowns?.booster ?? 0,
     medical: d.cooldowns?.medical ?? 0,
+  };
+}
+
+interface RawRefillsResponse extends RawErrorResponse {
+  refills?: {
+    energy_refill_used?: boolean;
+    nerve_refill_used?: boolean;
+  };
+}
+
+export async function fetchTornRefills(apiKey: string): Promise<TornRefills> {
+  const d = await fetchTornSelectionsCached<RawRefillsResponse>(apiKey, "refills", REFILLS_TTL_MS);
+  return {
+    energy: d.refills?.energy_refill_used ?? false,
+    nerve: d.refills?.nerve_refill_used ?? false,
   };
 }
 

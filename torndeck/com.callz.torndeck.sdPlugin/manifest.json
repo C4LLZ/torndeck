@@ -1,6 +1,6 @@
 {
   "Name": "TornDeck",
-  "Version": "0.6.0.0",
+  "Version": "0.7.0.0",
   "Author": "Callz",
   "Actions": [
     {
@@ -83,6 +83,20 @@
       "States": [
         {
           "Image": "imgs/actions/cooldowns/key",
+          "TitleAlignment": "middle"
+        }
+      ]
+    },
+    {
+      "Name": "Refills",
+      "UUID": "com.callz.torndeck.refills",
+      "Icon": "imgs/actions/refills/icon",
+      "Tooltip": "Shows whether today's free energy/nerve refill has been used - pick which one in the settings. Flashes while still available.",
+      "PropertyInspectorPath": "ui/refills.html",
+      "Controllers": ["Keypad"],
+      "States": [
+        {
+          "Image": "imgs/actions/refills/key",
           "TitleAlignment": "middle"
         }
       ]
