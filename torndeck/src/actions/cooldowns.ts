@@ -3,6 +3,7 @@ import { flashEnabledOf, PollingAction } from "../lib/polling-action";
 import { BlinkController } from "../lib/blink";
 import { fetchTornCooldowns, TornApiError, TornCooldownType } from "../torn/api";
 import { getApiKey } from "../torn/settings";
+import { nowSeconds } from "../torn/clock";
 import { renderCooldownSvg } from "../torn/render-cooldowns";
 
 type CooldownsSettings = {
@@ -58,7 +59,7 @@ export class Cooldowns extends PollingAction<CooldownsSettings> {
       const seconds = cooldowns[type];
 
       if (seconds > 0) {
-        this.states.set(action.id, Date.now() / 1000 + seconds);
+        this.states.set(action.id, nowSeconds() + seconds);
         this.blink.reset(action.id);
         this.ensureTicking(action, settings);
       } else {
@@ -95,7 +96,7 @@ export class Cooldowns extends PollingAction<CooldownsSettings> {
     if (deadline === undefined) return;
     const type = typeOf(settings);
 
-    const remaining = deadline - Date.now() / 1000;
+    const remaining = deadline - nowSeconds();
     if (remaining <= 0) {
       this.stopTicking(action.id);
       this.states.set(action.id, undefined);

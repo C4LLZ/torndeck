@@ -3,6 +3,7 @@ import { flashEnabledOf, PollingAction } from "../lib/polling-action";
 import { BlinkController } from "../lib/blink";
 import { fetchTornTravel, TornApiError } from "../torn/api";
 import { getApiKey } from "../torn/settings";
+import { nowSeconds } from "../torn/clock";
 import { isAbroad, renderFlightAbroadSvg, renderFlightIdleSvg, renderFlightLandedSvg, renderFlightProgressSvg } from "../torn/render-flight";
 
 type FlightSettings = {
@@ -92,7 +93,7 @@ export class FlightStatus extends PollingAction<FlightSettings> {
     const state = this.states.get(action.id);
     if (!state || state.landed) return;
 
-    const remaining = state.arrival - Date.now() / 1000;
+    const remaining = state.arrival - nowSeconds();
     if (remaining <= 0) {
       state.landed = true;
       const timer = this.ticks.get(action.id);

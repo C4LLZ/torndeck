@@ -1,5 +1,6 @@
 import { escapeXml, formatDuration, svgDataUri } from "../lib/format";
 import { PLANE_ICON, tornIconSvg } from "./icons";
+import { nowSeconds } from "./clock";
 
 const SIZE = 144;
 const CARD_BG = "#1c1e24";
@@ -93,7 +94,7 @@ export interface FlightProgress {
 
 /** In-flight card: the Travel Agency plane moving along a dashed path, with a live countdown. */
 export function renderFlightProgressSvg(travel: FlightProgress): string {
-  const now = Date.now() / 1000;
+  const now = nowSeconds();
   const total = Math.max(1, travel.arrival - travel.departed);
   const progress = Math.min(1, Math.max(0, (now - travel.departed) / total));
   const remaining = Math.max(0, travel.arrival - now);

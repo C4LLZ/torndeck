@@ -3,6 +3,7 @@ import { flashEnabledOf, PollingAction } from "../lib/polling-action";
 import { BlinkController } from "../lib/blink";
 import { fetchTornStatus, TornApiError } from "../torn/api";
 import { getApiKey } from "../torn/settings";
+import { nowSeconds } from "../torn/clock";
 import { renderHospitalActiveSvg, renderHospitalIdleSvg } from "../torn/render-hospital";
 
 type HospitalSettings = {
@@ -54,7 +55,7 @@ export class Hospital extends PollingAction<HospitalSettings> {
       const status = await fetchTornStatus(apiKey);
       await action.setTitle("");
 
-      if (status.state === "Hospital" && status.until > Date.now() / 1000) {
+      if (status.state === "Hospital" && status.until > nowSeconds()) {
         this.states.set(action.id, status.until);
         this.ensureTicking(action, settings);
       } else {
@@ -91,7 +92,7 @@ export class Hospital extends PollingAction<HospitalSettings> {
     const until = this.states.get(action.id);
     if (until === undefined) return;
 
-    const remaining = until - Date.now() / 1000;
+    const remaining = until - nowSeconds();
     if (remaining <= 0) {
       this.stopTicking(action.id);
       this.states.set(action.id, undefined);

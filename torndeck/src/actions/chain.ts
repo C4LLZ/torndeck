@@ -3,6 +3,7 @@ import { flashEnabledOf, PollingAction } from "../lib/polling-action";
 import { BlinkController } from "../lib/blink";
 import { fetchTornChain, TornApiError } from "../torn/api";
 import { getApiKey } from "../torn/settings";
+import { nowSeconds } from "../torn/clock";
 import { renderChainActiveSvg, renderChainIdleSvg } from "../torn/render-chain";
 
 type ChainSettings = {
@@ -60,7 +61,7 @@ export class Chain extends PollingAction<ChainSettings> {
       await action.setTitle("");
 
       if (chain.current > 0 && chain.timeout > 0) {
-        this.states.set(action.id, { current: chain.current, deadline: Date.now() / 1000 + chain.timeout });
+        this.states.set(action.id, { current: chain.current, deadline: nowSeconds() + chain.timeout });
         this.ensureTicking(action, settings);
       } else {
         this.stopTicking(action.id);
@@ -96,7 +97,7 @@ export class Chain extends PollingAction<ChainSettings> {
     const state = this.states.get(action.id);
     if (!state) return;
 
-    const remaining = state.deadline - Date.now() / 1000;
+    const remaining = state.deadline - nowSeconds();
     if (remaining <= 0) {
       // The chain has dropped; stop guessing locally and wait for the next sync to confirm.
       this.stopTicking(action.id);

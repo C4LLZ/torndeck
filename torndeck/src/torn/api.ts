@@ -1,4 +1,5 @@
 import { cached } from "./cache";
+import { syncServerTime } from "./clock";
 
 export interface TornBar {
   current: number;
@@ -73,6 +74,8 @@ interface RawErrorResponse {
     code: number;
     error?: string;
   };
+  /** Torn's own server clock, in epoch seconds - requested alongside every real selection below. */
+  timestamp?: number;
 }
 
 async function fetchTornSelections<T extends RawErrorResponse>(apiKey: string, selections: string): Promise<T> {
@@ -89,15 +92,19 @@ async function fetchTornSelections<T extends RawErrorResponse>(apiKey: string, s
     throw new TornApiError(d.error.code, d.error.error ?? `Torn API error ${d.error.code}`);
   }
 
+  if (typeof d.timestamp === "number") syncServerTime(d.timestamp);
+
   return d;
 }
 
 /**
  * Caches a Torn API call for `ttlMs`, keyed by API key + selections, so multiple actions asking
  * for the same (or an overlapping) selection set within that window share one real HTTP request.
+ * Every call also requests the `timestamp` selection, to keep {@link syncServerTime} up to date.
  */
 function fetchTornSelectionsCached<T extends RawErrorResponse>(apiKey: string, selections: string, ttlMs: number): Promise<T> {
-  return cached(`${apiKey}:${selections}`, ttlMs, () => fetchTornSelections<T>(apiKey, selections));
+  const withClock = `${selections},timestamp`;
+  return cached(`${apiKey}:${withClock}`, ttlMs, () => fetchTornSelections<T>(apiKey, withClock));
 }
 
 /** Shared TTL for the combined bars+notifications call - just under Chain's fastest refresh cadence, so Chain's own poll drives the real fetch and Stats/Notifications piggyback on it. */
