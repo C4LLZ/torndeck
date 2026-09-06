@@ -23,7 +23,7 @@ Every key also supports:
 ## Setup
 
 1. Get a Torn API key at [torn.com/preferences.php#tab=api](https://www.torn.com/preferences.php#tab=api) (minimal access is enough for everything here).
-2. Install the plugin (see Releases, or build from source below).
+2. Install the plugin — grab the `.streamDeckPlugin` file from [Releases](https://github.com/C4LLZ/torndeck/releases) and double-click it (Stream Deck will install it), or build from source below.
 3. Drag any TornDeck action onto a key and paste your API key into its settings — it's shared automatically with every other TornDeck key.
 
 ## Building from source
@@ -48,3 +48,7 @@ npx streamdeck pack com.callz.torndeck.sdPlugin        # produce a distributable
 - A shared request cache dedupes overlapping API calls (e.g. Stats, Notifications, and Chain all pull from the same `bars,notifications` call) so adding more keys doesn't multiply your request volume.
 - Countdown timers tick locally every second between syncs, corrected against Torn's own server clock (not just the local machine's) so they stay accurate.
 - All alerts share one "blink until acknowledged" pattern: flash starts when something needs attention, stops the moment you press the key, and re-arms automatically once the underlying condition changes again.
+
+## License
+
+[MIT](LICENSE)
