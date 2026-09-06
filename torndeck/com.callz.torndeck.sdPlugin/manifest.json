@@ -1,129 +1,142 @@
 {
-  "Name": "TornDeck",
-  "Version": "0.7.0.0",
-  "Author": "Callz",
-  "Actions": [
-    {
-      "Name": "Stats Indicator",
-      "UUID": "com.callz.torndeck.statsindicator",
-      "Icon": "imgs/actions/stats/icon",
-      "Tooltip": "Live Torn.com stat bars with an unread notification badge.",
-      "PropertyInspectorPath": "ui/stats-indicator.html",
-      "Controllers": ["Keypad"],
-      "States": [
-        {
-          "Image": "imgs/actions/stats/key",
-          "TitleAlignment": "middle"
-        }
-      ]
-    },
-    {
-      "Name": "Flight Status",
-      "UUID": "com.callz.torndeck.flightstatus",
-      "Icon": "imgs/actions/flight/icon",
-      "Tooltip": "Shows your current Torn.com flight progress and time left, and flashes when you land.",
-      "PropertyInspectorPath": "ui/flight-status.html",
-      "Controllers": ["Keypad"],
-      "States": [
-        {
-          "Image": "imgs/actions/flight/key",
-          "TitleAlignment": "middle"
-        }
-      ]
-    },
-    {
-      "Name": "Notifications",
-      "UUID": "com.callz.torndeck.notifications",
-      "Icon": "imgs/actions/notifications/icon",
-      "Tooltip": "Unread event/message/award/competition count. Flashes until you press it to dismiss.",
-      "PropertyInspectorPath": "ui/notifications.html",
-      "Controllers": ["Keypad"],
-      "States": [
-        {
-          "Image": "imgs/actions/notifications/key",
-          "TitleAlignment": "middle"
-        }
-      ]
-    },
-    {
-      "Name": "Chain",
-      "UUID": "com.callz.torndeck.chain",
-      "Icon": "imgs/actions/chain/icon",
-      "Tooltip": "Live chain count and countdown. Flashes once it's close to dropping, by a threshold you set.",
-      "PropertyInspectorPath": "ui/chain.html",
-      "Controllers": ["Keypad"],
-      "States": [
-        {
-          "Image": "imgs/actions/chain/key",
-          "TitleAlignment": "middle"
-        }
-      ]
-    },
-    {
-      "Name": "Hospital",
-      "UUID": "com.callz.torndeck.hospital",
-      "Icon": "imgs/actions/hospital/icon",
-      "Tooltip": "Live hospital release countdown. Flashes once you're close to release, by a threshold you set.",
-      "PropertyInspectorPath": "ui/hospital.html",
-      "Controllers": ["Keypad"],
-      "States": [
-        {
-          "Image": "imgs/actions/hospital/key",
-          "TitleAlignment": "middle"
-        }
-      ]
-    },
-    {
-      "Name": "Cooldowns",
-      "UUID": "com.callz.torndeck.cooldowns",
-      "Icon": "imgs/actions/cooldowns/icon",
-      "Tooltip": "Live drug/booster/medical cooldown countdown - pick which one in the settings. Flashes when ready.",
-      "PropertyInspectorPath": "ui/cooldowns.html",
-      "Controllers": ["Keypad"],
-      "States": [
-        {
-          "Image": "imgs/actions/cooldowns/key",
-          "TitleAlignment": "middle"
-        }
-      ]
-    },
-    {
-      "Name": "Refills",
-      "UUID": "com.callz.torndeck.refills",
-      "Icon": "imgs/actions/refills/icon",
-      "Tooltip": "Shows whether today's free energy/nerve refill has been used - pick which one in the settings. Flashes while still available.",
-      "PropertyInspectorPath": "ui/refills.html",
-      "Controllers": ["Keypad"],
-      "States": [
-        {
-          "Image": "imgs/actions/refills/key",
-          "TitleAlignment": "middle"
-        }
-      ]
-    }
-  ],
-  "Category": "TornDeck",
-  "CategoryIcon": "imgs/plugin/category-icon",
-  "CodePath": "bin/plugin.js",
-  "Description": "For Torn.com",
-  "Icon": "imgs/plugin/marketplace",
-  "SDKVersion": 2,
-  "Software": {
-    "MinimumVersion": "6.5"
-  },
-  "OS": [
-    {
-      "Platform": "mac",
-      "MinimumVersion": "12"
-    },
-    {
-      "Platform": "windows",
-      "MinimumVersion": "10"
-    }
-  ],
-  "Nodejs": {
-    "Version": "20",
-    "Debug": "enabled"
-  },
-  "UUID": "com.callz.torndeck"
+	"Name": "TornDeck",
+	"Version": "1.0.0.0",
+	"Author": "Callz",
+	"Actions": [
+		{
+			"Name": "Stats Indicator",
+			"UUID": "com.callz.torndeck.statsindicator",
+			"Icon": "imgs/actions/stats/icon",
+			"Tooltip": "Live Torn.com stat bars with an unread notification badge.",
+			"PropertyInspectorPath": "ui/stats-indicator.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/stats/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Flight Status",
+			"UUID": "com.callz.torndeck.flightstatus",
+			"Icon": "imgs/actions/flight/icon",
+			"Tooltip": "Shows your current Torn.com flight progress and time left, and flashes when you land.",
+			"PropertyInspectorPath": "ui/flight-status.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/flight/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Notifications",
+			"UUID": "com.callz.torndeck.notifications",
+			"Icon": "imgs/actions/notifications/icon",
+			"Tooltip": "Unread event/message/award/competition count. Flashes until you press it to dismiss.",
+			"PropertyInspectorPath": "ui/notifications.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/notifications/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Chain",
+			"UUID": "com.callz.torndeck.chain",
+			"Icon": "imgs/actions/chain/icon",
+			"Tooltip": "Live chain count and countdown. Flashes once it's close to dropping, by a threshold you set.",
+			"PropertyInspectorPath": "ui/chain.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/chain/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Hospital",
+			"UUID": "com.callz.torndeck.hospital",
+			"Icon": "imgs/actions/hospital/icon",
+			"Tooltip": "Live hospital release countdown. Flashes once you're close to release, by a threshold you set.",
+			"PropertyInspectorPath": "ui/hospital.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/hospital/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Cooldowns",
+			"UUID": "com.callz.torndeck.cooldowns",
+			"Icon": "imgs/actions/cooldowns/icon",
+			"Tooltip": "Live drug/booster/medical cooldown countdown - pick which one in the settings. Flashes when ready.",
+			"PropertyInspectorPath": "ui/cooldowns.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/cooldowns/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Refills",
+			"UUID": "com.callz.torndeck.refills",
+			"Icon": "imgs/actions/refills/icon",
+			"Tooltip": "Shows whether today's free energy/nerve refill has been used - pick which one in the settings. Flashes while still available.",
+			"PropertyInspectorPath": "ui/refills.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/refills/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		}
+	],
+	"Category": "TornDeck",
+	"CategoryIcon": "imgs/plugin/category-icon",
+	"CodePath": "bin/plugin.js",
+	"Description": "Live Torn.com stats, flight tracking, chain/hospital/cooldown/refill alerts, and notifications on your Stream Deck. Unofficial fan-made tool - not affiliated with Torn.com.",
+	"Icon": "imgs/plugin/marketplace",
+	"SDKVersion": 2,
+	"Software": {
+		"MinimumVersion": "6.5"
+	},
+	"OS": [
+		{
+			"Platform": "mac",
+			"MinimumVersion": "12"
+		},
+		{
+			"Platform": "windows",
+			"MinimumVersion": "10"
+		}
+	],
+	"Nodejs": {
+		"Version": "20"
+	},
+	"UUID": "com.callz.torndeck"
 }
