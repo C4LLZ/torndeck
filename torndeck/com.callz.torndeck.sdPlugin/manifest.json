@@ -121,9 +121,9 @@
 	"CodePath": "bin/plugin.js",
 	"Description": "Live Torn.com stats, flight tracking, chain/hospital/cooldown/refill alerts, and notifications on your Stream Deck. Unofficial fan-made tool - not affiliated with Torn.com.",
 	"Icon": "imgs/plugin/marketplace",
-	"SDKVersion": 2,
+	"SDKVersion": 3,
 	"Software": {
-		"MinimumVersion": "6.5"
+		"MinimumVersion": "6.9"
 	},
 	"OS": [
 		{

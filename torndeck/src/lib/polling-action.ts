@@ -1,6 +1,5 @@
 import streamDeck, {
   DidReceiveSettingsEvent,
-  JsonObject,
   KeyAction,
   KeyDownEvent,
   KeyUpEvent,
@@ -8,6 +7,7 @@ import streamDeck, {
   WillAppearEvent,
   WillDisappearEvent
 } from "@elgato/streamdeck";
+import type { JsonObject } from "@elgato/utils";
 import { LongPressTracker } from "./long-press";
 import { openUrl } from "./torn-link";
 
