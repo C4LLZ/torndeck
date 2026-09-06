@@ -1,3 +1,4 @@
+import streamDeck from "@elgato/streamdeck";
 import { cached } from "./cache";
 import { syncServerTime } from "./clock";
 
@@ -78,7 +79,23 @@ interface RawErrorResponse {
   timestamp?: number;
 }
 
+/**
+ * Tracks real (non-cached) Torn API calls made in the trailing 60s, logged on every call, so
+ * actual request volume can be read straight from the plugin's log file instead of estimated.
+ */
+const recentCallTimestamps: number[] = [];
+
+function logApiCall(selections: string): void {
+  const now = Date.now();
+  recentCallTimestamps.push(now);
+  while (recentCallTimestamps.length && now - recentCallTimestamps[0] > 60_000) {
+    recentCallTimestamps.shift();
+  }
+  streamDeck.logger.info(`Torn API request: ${selections} (${recentCallTimestamps.length} requests in the last 60s)`);
+}
+
 async function fetchTornSelections<T extends RawErrorResponse>(apiKey: string, selections: string): Promise<T> {
+  logApiCall(selections);
   const url = `https://api.torn.com/user/?selections=${selections}&key=${encodeURIComponent(apiKey)}`;
   const res = await fetch(url);
 
@@ -107,11 +124,16 @@ function fetchTornSelectionsCached<T extends RawErrorResponse>(apiKey: string, s
   return cached(`${apiKey}:${withClock}`, ttlMs, () => fetchTornSelections<T>(apiKey, withClock));
 }
 
-/** Shared TTL for the combined bars+notifications call - just under Chain's fastest refresh cadence, so Chain's own poll drives the real fetch and Stats/Notifications piggyback on it. */
-const BARS_NOTIFICATIONS_TTL_MS = 15_000;
-const TRAVEL_TTL_MS = 15_000;
-const BASIC_TTL_MS = 25_000;
-const COOLDOWNS_TTL_MS = 15_000;
+/**
+ * Cache TTLs are matched to the fastest fixed poll interval among each selection's consumers (see
+ * the `defaultRefreshSeconds` on each action), not set arbitrarily short - a TTL shorter than the
+ * poll cycle means multiple same-selection instances (e.g. all three Cooldowns keys) drift in and
+ * out of "fresh" independently and end up double-fetching instead of sharing one request.
+ */
+const BARS_NOTIFICATIONS_TTL_MS = 20_000; // Chain polls every 20s, the fastest of that shared cluster
+const TRAVEL_TTL_MS = 30_000; // Flight polls every 30s
+const BASIC_TTL_MS = 60_000; // Hospital polls every 60s
+const COOLDOWNS_TTL_MS = 30_000; // Cooldowns polls every 30s - matters most with all 3 keys placed
 const REFILLS_TTL_MS = 55_000;
 
 interface RawBar {
