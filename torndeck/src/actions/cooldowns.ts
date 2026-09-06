@@ -1,5 +1,5 @@
 import streamDeck, { action, KeyAction } from "@elgato/streamdeck";
-import { PollingAction } from "../lib/polling-action";
+import { flashEnabledOf, PollingAction } from "../lib/polling-action";
 import { BlinkController } from "../lib/blink";
 import { fetchTornCooldowns, TornApiError, TornCooldownType } from "../torn/api";
 import { getApiKey } from "../torn/settings";
@@ -8,6 +8,8 @@ import { renderCooldownSvg } from "../torn/render-cooldowns";
 type CooldownsSettings = {
   cooldownType?: TornCooldownType;
   refreshSeconds?: number;
+  flashEnabled?: boolean;
+  longPressUrl?: string;
 };
 
 function typeOf(settings: CooldownsSettings): TornCooldownType {
@@ -58,11 +60,11 @@ export class Cooldowns extends PollingAction<CooldownsSettings> {
       if (seconds > 0) {
         this.states.set(action.id, Date.now() / 1000 + seconds);
         this.blink.reset(action.id);
-        this.ensureTicking(action, type);
+        this.ensureTicking(action, settings);
       } else {
         this.stopTicking(action.id);
         this.states.set(action.id, undefined);
-        this.blink.set(action, renderCooldownSvg(type, 0, false), renderCooldownSvg(type, 0, true));
+        this.blink.set(action, renderCooldownSvg(type, 0, false), renderCooldownSvg(type, 0, true), flashEnabledOf(settings));
       }
 
       if (manual) await action.showOk();
@@ -73,11 +75,11 @@ export class Cooldowns extends PollingAction<CooldownsSettings> {
     }
   }
 
-  private ensureTicking(action: KeyAction<CooldownsSettings>, type: TornCooldownType): void {
+  private ensureTicking(action: KeyAction<CooldownsSettings>, settings: CooldownsSettings): void {
     if (this.ticks.has(action.id)) return;
-    const timer = setInterval(() => this.tick(action, type), 1000);
+    const timer = setInterval(() => this.tick(action, settings), 1000);
     this.ticks.set(action.id, timer);
-    this.tick(action, type);
+    this.tick(action, settings);
   }
 
   private stopTicking(actionId: string): void {
@@ -88,15 +90,16 @@ export class Cooldowns extends PollingAction<CooldownsSettings> {
     }
   }
 
-  private tick(action: KeyAction<CooldownsSettings>, type: TornCooldownType): void {
+  private tick(action: KeyAction<CooldownsSettings>, settings: CooldownsSettings): void {
     const deadline = this.states.get(action.id);
     if (deadline === undefined) return;
+    const type = typeOf(settings);
 
     const remaining = deadline - Date.now() / 1000;
     if (remaining <= 0) {
       this.stopTicking(action.id);
       this.states.set(action.id, undefined);
-      this.blink.set(action, renderCooldownSvg(type, 0, false), renderCooldownSvg(type, 0, true));
+      this.blink.set(action, renderCooldownSvg(type, 0, false), renderCooldownSvg(type, 0, true), flashEnabledOf(settings));
       return;
     }
 

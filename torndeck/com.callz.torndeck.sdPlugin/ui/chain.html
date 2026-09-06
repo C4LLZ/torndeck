@@ -27,7 +27,18 @@
     <sdpi-textfield setting="flashThresholdSeconds" placeholder="60" pattern="[0-9]*"></sdpi-textfield>
   </sdpi-item>
   <sdpi-item>
-    <p class="hint">Starts flashing once this many seconds are left before the chain would drop. Long-press any TornDeck key to jump straight to Torn.</p>
+    <p class="hint">Starts flashing once this many seconds are left before the chain would drop.</p>
+  </sdpi-item>
+
+  <sdpi-item label="Flash for alerts">
+    <sdpi-checkbox setting="flashEnabled" label="Enabled" default="true"></sdpi-checkbox>
+  </sdpi-item>
+
+  <sdpi-item label="Long-press opens">
+    <sdpi-textfield setting="longPressUrl" placeholder="https://www.torn.com"></sdpi-textfield>
+  </sdpi-item>
+  <sdpi-item>
+    <p class="hint">Leave blank to open torn.com (default).</p>
   </sdpi-item>
 </body>
 </html>

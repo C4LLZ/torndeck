@@ -45,7 +45,18 @@
   </sdpi-item>
 
   <sdpi-item>
-    <p class="hint">A red badge with your unread notification count appears automatically whenever you have any. Long-press any TornDeck key to jump straight to Torn.</p>
+    <p class="hint">A red badge with your unread notification count appears automatically whenever you have any.</p>
+  </sdpi-item>
+
+  <sdpi-item label="Flash for alerts">
+    <sdpi-checkbox setting="flashEnabled" label="Enabled" default="true"></sdpi-checkbox>
+  </sdpi-item>
+
+  <sdpi-item label="Long-press opens">
+    <sdpi-textfield setting="longPressUrl" placeholder="https://www.torn.com"></sdpi-textfield>
+  </sdpi-item>
+  <sdpi-item>
+    <p class="hint">Leave blank to open torn.com (default).</p>
   </sdpi-item>
 </body>
 </html>

@@ -1,5 +1,5 @@
 import streamDeck, { action, KeyAction } from "@elgato/streamdeck";
-import { PollingAction } from "../lib/polling-action";
+import { flashEnabledOf, PollingAction } from "../lib/polling-action";
 import { BlinkController } from "../lib/blink";
 import { fetchTornRefills, TornApiError, TornRefillType } from "../torn/api";
 import { getApiKey } from "../torn/settings";
@@ -8,6 +8,8 @@ import { renderRefillSvg } from "../torn/render-refills";
 type RefillsSettings = {
   refillType?: TornRefillType;
   refreshSeconds?: number;
+  flashEnabled?: boolean;
+  longPressUrl?: string;
 };
 
 function typeOf(settings: RefillsSettings): TornRefillType {
@@ -49,7 +51,7 @@ export class Refills extends PollingAction<RefillsSettings> {
       const used = refills[type];
 
       if (!used) {
-        this.blink.set(action, renderRefillSvg(type, false, false), renderRefillSvg(type, false, true));
+        this.blink.set(action, renderRefillSvg(type, false, false), renderRefillSvg(type, false, true), flashEnabledOf(settings));
       } else {
         this.blink.reset(action.id);
         await action.setImage(renderRefillSvg(type, true, false));

@@ -1,5 +1,5 @@
 import streamDeck, { action, KeyAction } from "@elgato/streamdeck";
-import { PollingAction } from "../lib/polling-action";
+import { flashEnabledOf, PollingAction } from "../lib/polling-action";
 import { BlinkController } from "../lib/blink";
 import { fetchTornTravel, TornApiError } from "../torn/api";
 import { getApiKey } from "../torn/settings";
@@ -7,6 +7,8 @@ import { isAbroad, renderFlightAbroadSvg, renderFlightIdleSvg, renderFlightLande
 
 type FlightSettings = {
   refreshSeconds?: number;
+  flashEnabled?:   boolean;
+  longPressUrl?:   string;
 };
 
 interface FlightState {
@@ -45,7 +47,7 @@ export class FlightStatus extends PollingAction<FlightSettings> {
     await this.refresh(action, settings, true);
   }
 
-  protected override async refresh(action: KeyAction<FlightSettings>, _settings: FlightSettings, manual: boolean): Promise<void> {
+  protected override async refresh(action: KeyAction<FlightSettings>, settings: FlightSettings, manual: boolean): Promise<void> {
     const apiKey = await getApiKey();
     if (!apiKey) {
       await action.setTitle("No API key");
@@ -64,7 +66,7 @@ export class FlightStatus extends PollingAction<FlightSettings> {
           landed: false,
         });
         this.blink.reset(action.id);
-        this.ensureTicking(action);
+        this.ensureTicking(action, settings);
       } else if (!this.states.get(action.id)?.landed) {
         // Not travelling per the API, and we're not already sitting in an unacknowledged "landed" blink.
         this.states.set(action.id, undefined);
@@ -79,14 +81,14 @@ export class FlightStatus extends PollingAction<FlightSettings> {
     }
   }
 
-  private ensureTicking(action: KeyAction<FlightSettings>): void {
+  private ensureTicking(action: KeyAction<FlightSettings>, settings: FlightSettings): void {
     if (this.ticks.has(action.id)) return;
-    const timer = setInterval(() => this.tick(action), 1000);
+    const timer = setInterval(() => this.tick(action, settings), 1000);
     this.ticks.set(action.id, timer);
-    this.tick(action);
+    this.tick(action, settings);
   }
 
-  private tick(action: KeyAction<FlightSettings>): void {
+  private tick(action: KeyAction<FlightSettings>, settings: FlightSettings): void {
     const state = this.states.get(action.id);
     if (!state || state.landed) return;
 
@@ -96,7 +98,7 @@ export class FlightStatus extends PollingAction<FlightSettings> {
       const timer = this.ticks.get(action.id);
       if (timer) clearInterval(timer);
       this.ticks.delete(action.id);
-      this.blink.set(action, renderFlightLandedSvg(state.destination, false), renderFlightLandedSvg(state.destination, true));
+      this.blink.set(action, renderFlightLandedSvg(state.destination, false), renderFlightLandedSvg(state.destination, true), flashEnabledOf(settings));
       return;
     }
 

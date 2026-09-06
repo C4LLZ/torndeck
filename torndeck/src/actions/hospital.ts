@@ -1,5 +1,5 @@
 import streamDeck, { action, KeyAction } from "@elgato/streamdeck";
-import { PollingAction } from "../lib/polling-action";
+import { flashEnabledOf, PollingAction } from "../lib/polling-action";
 import { BlinkController } from "../lib/blink";
 import { fetchTornStatus, TornApiError } from "../torn/api";
 import { getApiKey } from "../torn/settings";
@@ -9,6 +9,8 @@ type HospitalSettings = {
   refreshSeconds?: number;
   /** Start flashing once this many minutes are left before release. */
   flashThresholdMinutes?: number;
+  flashEnabled?: boolean;
+  longPressUrl?: string;
 };
 
 const DEFAULT_FLASH_THRESHOLD_MINUTES = 5;
@@ -100,7 +102,7 @@ export class Hospital extends PollingAction<HospitalSettings> {
 
     const thresholdSeconds = Math.max(MIN_FLASH_THRESHOLD_MINUTES, settings.flashThresholdMinutes ?? DEFAULT_FLASH_THRESHOLD_MINUTES) * 60;
     if (remaining <= thresholdSeconds) {
-      this.blink.set(action, renderHospitalActiveSvg(remaining, false), renderHospitalActiveSvg(remaining, true));
+      this.blink.set(action, renderHospitalActiveSvg(remaining, false), renderHospitalActiveSvg(remaining, true), flashEnabledOf(settings));
     } else {
       this.blink.reset(action.id);
       void action.setImage(renderHospitalActiveSvg(remaining, false));

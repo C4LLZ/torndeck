@@ -1,5 +1,5 @@
 import streamDeck, { action, KeyAction } from "@elgato/streamdeck";
-import { PollingAction } from "../lib/polling-action";
+import { flashEnabledOf, PollingAction } from "../lib/polling-action";
 import { BlinkController } from "../lib/blink";
 import { fetchTornChain, TornApiError } from "../torn/api";
 import { getApiKey } from "../torn/settings";
@@ -9,6 +9,8 @@ type ChainSettings = {
   refreshSeconds?: number;
   /** Start flashing once this many seconds are left before the chain drops. */
   flashThresholdSeconds?: number;
+  flashEnabled?: boolean;
+  longPressUrl?: string;
 };
 
 interface ChainState {
@@ -106,7 +108,7 @@ export class Chain extends PollingAction<ChainSettings> {
 
     const threshold = Math.max(MIN_FLASH_THRESHOLD, settings.flashThresholdSeconds ?? DEFAULT_FLASH_THRESHOLD);
     if (remaining <= threshold) {
-      this.blink.set(action, renderChainActiveSvg(state.current, remaining, false), renderChainActiveSvg(state.current, remaining, true));
+      this.blink.set(action, renderChainActiveSvg(state.current, remaining, false), renderChainActiveSvg(state.current, remaining, true), flashEnabledOf(settings));
     } else {
       this.blink.reset(action.id);
       void action.setImage(renderChainActiveSvg(state.current, remaining, false));

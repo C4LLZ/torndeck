@@ -24,9 +24,19 @@ export class BlinkController {
     return this.entries.has(id);
   }
 
-  /** Arms (or updates) the blink for this action instance. No-ops if already acknowledged this occurrence. */
-  set(action: KeyAction<any>, normalFrame: string, flashFrame: string): void {
+  /**
+   * Arms (or updates) the blink for this action instance, showing `normalFrame` steadily instead
+   * when `flashEnabled` is false (the user's "don't flash" setting) or once acknowledged.
+   */
+  set(action: KeyAction<any>, normalFrame: string, flashFrame: string, flashEnabled = true): void {
     const id = action.id;
+
+    if (!flashEnabled) {
+      this.stop(id);
+      void action.setImage(normalFrame);
+      return;
+    }
+
     const existing = this.entries.get(id);
     if (existing) {
       existing.normal = normalFrame;

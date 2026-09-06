@@ -9,12 +9,23 @@ import streamDeck, {
   WillDisappearEvent
 } from "@elgato/streamdeck";
 import { LongPressTracker } from "./long-press";
-import { openTorn } from "./torn-link";
+import { openUrl } from "./torn-link";
 
 interface Instance<TSettings extends JsonObject> {
   action: KeyAction<TSettings>;
   settings: TSettings;
   timer?: ReturnType<typeof setInterval>;
+}
+
+/** Reads the per-action "long-press opens" URL setting shared by every TornDeck action. */
+export function longPressUrlOf(settings: JsonObject): string | undefined {
+  const raw = (settings as { longPressUrl?: unknown }).longPressUrl;
+  return typeof raw === "string" ? raw : undefined;
+}
+
+/** Reads the per-action "flash for alerts" toggle shared by every TornDeck action; defaults to on. */
+export function flashEnabledOf(settings: JsonObject): boolean {
+  return (settings as { flashEnabled?: unknown }).flashEnabled !== false;
 }
 
 /**
@@ -79,7 +90,7 @@ export abstract class PollingAction<TSettings extends JsonObject> extends Single
     if (instance) instance.settings = ev.payload.settings;
 
     if (this.longPress.up(ev.action.id)) {
-      openTorn();
+      openUrl(longPressUrlOf(ev.payload.settings));
       return;
     }
     await this.onKeyPress(ev.action, ev.payload.settings);

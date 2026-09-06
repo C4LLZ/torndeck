@@ -24,7 +24,18 @@
   </sdpi-item>
 
   <sdpi-item>
-    <p class="hint">Shows your unread event/message/award/competition count. Flashes red until you press the key to dismiss it - it'll flash again next time something new comes in. Long-press any TornDeck key to jump straight to Torn.</p>
+    <p class="hint">Shows your unread event/message/award/competition count. Flashes red until you press the key to dismiss it - it'll flash again next time something new comes in.</p>
+  </sdpi-item>
+
+  <sdpi-item label="Flash for alerts">
+    <sdpi-checkbox setting="flashEnabled" label="Enabled" default="true"></sdpi-checkbox>
+  </sdpi-item>
+
+  <sdpi-item label="Long-press opens">
+    <sdpi-textfield setting="longPressUrl" placeholder="https://www.torn.com"></sdpi-textfield>
+  </sdpi-item>
+  <sdpi-item>
+    <p class="hint">Leave blank to open torn.com (default).</p>
   </sdpi-item>
 </body>
 </html>

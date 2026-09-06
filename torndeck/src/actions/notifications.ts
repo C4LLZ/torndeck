@@ -1,5 +1,5 @@
 import streamDeck, { action, KeyAction } from "@elgato/streamdeck";
-import { PollingAction } from "../lib/polling-action";
+import { flashEnabledOf, PollingAction } from "../lib/polling-action";
 import { BlinkController } from "../lib/blink";
 import { fetchTornNotifications, TornApiError } from "../torn/api";
 import { getApiKey } from "../torn/settings";
@@ -7,6 +7,8 @@ import { renderNotificationsSvg } from "../torn/render-notifications";
 
 type NotificationsSettings = {
   refreshSeconds?: number;
+  flashEnabled?:   boolean;
+  longPressUrl?:   string;
 };
 
 /** Dedicated notification-only key: bell + unread count, blinking until pressed whenever anything's unread. */
@@ -29,7 +31,7 @@ export class Notifications extends PollingAction<NotificationsSettings> {
     await this.refresh(action, settings, true);
   }
 
-  protected override async refresh(action: KeyAction<NotificationsSettings>, _settings: NotificationsSettings, manual: boolean): Promise<void> {
+  protected override async refresh(action: KeyAction<NotificationsSettings>, settings: NotificationsSettings, manual: boolean): Promise<void> {
     const apiKey = await getApiKey();
     if (!apiKey) {
       await action.setTitle("No API key");
@@ -42,7 +44,7 @@ export class Notifications extends PollingAction<NotificationsSettings> {
 
       const total = notifications.events + notifications.messages + notifications.awards + notifications.competition;
       if (total > 0) {
-        this.blink.set(action, renderNotificationsSvg(notifications, false), renderNotificationsSvg(notifications, true));
+        this.blink.set(action, renderNotificationsSvg(notifications, false), renderNotificationsSvg(notifications, true), flashEnabledOf(settings));
       } else {
         this.blink.reset(action.id);
         await action.setImage(renderNotificationsSvg(notifications, false));

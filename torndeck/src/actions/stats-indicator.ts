@@ -1,5 +1,5 @@
 import streamDeck, { action, KeyAction } from "@elgato/streamdeck";
-import { PollingAction } from "../lib/polling-action";
+import { flashEnabledOf, PollingAction } from "../lib/polling-action";
 import { BlinkController } from "../lib/blink";
 import { fetchTornStats, TornApiError, TornBar } from "../torn/api";
 import { getApiKey } from "../torn/settings";
@@ -16,6 +16,8 @@ type StatsSettings = {
   alertNerveFull?:  boolean;
   alertHappyFull?:  boolean;
   alertLifeFull?:   boolean;
+  flashEnabled?:    boolean;
+  longPressUrl?:    string;
 };
 
 /**
@@ -64,7 +66,7 @@ export class StatsIndicator extends PollingAction<StatsSettings> {
         ((settings.alertLifeFull ?? false) && isFull(stats.life));
 
       if (alertActive) {
-        this.blink.set(action, renderStatsSvg(stats, settings, false), renderStatsSvg(stats, settings, true));
+        this.blink.set(action, renderStatsSvg(stats, settings, false), renderStatsSvg(stats, settings, true), flashEnabledOf(settings));
       } else {
         this.blink.reset(action.id);
         await action.setImage(renderStatsSvg(stats, settings, false));
