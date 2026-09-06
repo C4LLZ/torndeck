@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Flight Status Settings</title>
+  <script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+  <style>
+    .hint { opacity: 0.6; font-size: 11px; margin: 0; }
+  </style>
+</head>
+<body>
+  <sdpi-item label="Torn API Key">
+    <sdpi-textfield setting="apiKey" global placeholder="Your Torn API key"></sdpi-textfield>
+  </sdpi-item>
+  <sdpi-item>
+    <p class="hint">Shared by every TornDeck key - enter it once.</p>
+  </sdpi-item>
+
+  <sdpi-item label="Sync every (sec)">
+    <sdpi-textfield setting="refreshSeconds" placeholder="30" pattern="[0-9]*"></sdpi-textfield>
+  </sdpi-item>
+  <sdpi-item>
+    <p class="hint">Minimum 20s. The countdown itself ticks every second locally - this only controls how often it re-syncs with Torn, e.g. to notice a newly booked flight.</p>
+  </sdpi-item>
+
+  <sdpi-item>
+    <p class="hint">Flashes green once you land, until you press it to dismiss. Long-press any TornDeck key to jump straight to Torn.</p>
+  </sdpi-item>
+</body>
+</html>

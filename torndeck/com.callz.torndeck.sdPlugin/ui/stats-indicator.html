@@ -3,61 +3,49 @@
 <head>
   <meta charset="utf-8" />
   <title>Stats Indicator Settings</title>
+  <script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+  <style>
+    .hint { opacity: 0.6; font-size: 11px; margin: 0; }
+  </style>
 </head>
 <body>
-  <label>
-    API Key:
-    <input type="text" id="apiKey" placeholder="Your Torn API key" />
-  </label><br/>
+  <sdpi-item label="Torn API Key">
+    <sdpi-textfield setting="apiKey" global placeholder="Your Torn API key"></sdpi-textfield>
+  </sdpi-item>
+  <sdpi-item>
+    <p class="hint">Shared by every TornDeck key - enter it once.</p>
+  </sdpi-item>
 
-  <label>
-    <input type="checkbox" id="showEnergy" checked />
-    Show Energy
-  </label><br/>
+  <sdpi-item label="Refresh every (sec)">
+    <sdpi-textfield setting="refreshSeconds" placeholder="60" pattern="[0-9]*"></sdpi-textfield>
+  </sdpi-item>
+  <sdpi-item>
+    <p class="hint">Minimum 30s, to stay well under Torn's API rate limit.</p>
+  </sdpi-item>
 
-  <label>
-    <input type="checkbox" id="showNerve" checked />
-    Show Nerve
-  </label><br/>
+  <sdpi-item label="Show bars">
+    <sdpi-checkbox setting="showEnergy" label="Energy" default="true"></sdpi-checkbox>
+    <sdpi-checkbox setting="showNerve" label="Nerve" default="true"></sdpi-checkbox>
+    <sdpi-checkbox setting="showHappy" label="Happy" default="true"></sdpi-checkbox>
+    <sdpi-checkbox setting="showLife" label="Life" default="true"></sdpi-checkbox>
+  </sdpi-item>
 
-  <button id="saveBtn">Save</button>
+  <sdpi-item label="Flash when full">
+    <sdpi-checkbox setting="alertEnergyFull" label="Energy" default="true"></sdpi-checkbox>
+    <sdpi-checkbox setting="alertNerveFull" label="Nerve" default="true"></sdpi-checkbox>
+    <sdpi-checkbox setting="alertHappyFull" label="Happy"></sdpi-checkbox>
+    <sdpi-checkbox setting="alertLifeFull" label="Life"></sdpi-checkbox>
+  </sdpi-item>
+  <sdpi-item>
+    <p class="hint">Only flashes exactly at your normal cap - stacking a bar past its usual max (e.g. energy for a ranked war) won't keep it flashing.</p>
+  </sdpi-item>
 
-  <script>
-    let ws, actionContext;
+  <sdpi-item label="Numbers">
+    <sdpi-checkbox setting="showNumbers" label="Show current/max on each bar"></sdpi-checkbox>
+  </sdpi-item>
 
-    function connectElgatoStreamDeckSocket(port, pluginUUID, registerEvent, info, actionInfo) {
-      actionContext = actionInfo.context;
-      ws = new WebSocket(`ws://127.0.0.1:${port}`);
-
-      ws.onopen = () => {
-        ws.send(JSON.stringify({ event: registerEvent, uuid: pluginUUID }));
-        ws.send(JSON.stringify({ event: "getSettings", context: actionContext }));
-      };
-
-      ws.onmessage = (evt) => {
-        const msg = JSON.parse(evt.data);
-        if (msg.event === "didReceiveSettings") {
-          const s = msg.payload.settings;
-          document.getElementById("apiKey").value      = s.apiKey      || "";
-          document.getElementById("showEnergy").checked = s.showEnergy ?? true;
-          document.getElementById("showNerve").checked  = s.showNerve  ?? true;
-        }
-      };
-    }
-
-    function saveSettings() {
-      ws.send(JSON.stringify({
-        event:   "setSettings",
-        context: actionContext,
-        payload: {
-          apiKey:     document.getElementById("apiKey").value,
-          showEnergy: document.getElementById("showEnergy").checked,
-          showNerve:  document.getElementById("showNerve").checked
-        }
-      }));
-    }
-
-    document.getElementById("saveBtn").addEventListener("click", saveSettings);
-  </script>
+  <sdpi-item>
+    <p class="hint">A red badge with your unread notification count appears automatically whenever you have any. Long-press any TornDeck key to jump straight to Torn.</p>
+  </sdpi-item>
 </body>
 </html>

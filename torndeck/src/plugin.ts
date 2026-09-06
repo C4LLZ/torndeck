@@ -1,11 +1,18 @@
 import streamDeck, { LogLevel } from "@elgato/streamdeck";
-import { IncrementCounter } from "./actions/increment-counter";
 import { StatsIndicator } from "./actions/stats-indicator";
-
+import { FlightStatus } from "./actions/flight-status";
+import { Notifications } from "./actions/notifications";
+import { Chain } from "./actions/chain";
+import { Hospital } from "./actions/hospital";
+import { Cooldowns } from "./actions/cooldowns";
 
 streamDeck.logger.setLevel(LogLevel.TRACE);
 
-streamDeck.actions.registerAction(new IncrementCounter());
 streamDeck.actions.registerAction(new StatsIndicator());
+streamDeck.actions.registerAction(new FlightStatus());
+streamDeck.actions.registerAction(new Notifications());
+streamDeck.actions.registerAction(new Chain());
+streamDeck.actions.registerAction(new Hospital());
+streamDeck.actions.registerAction(new Cooldowns());
 
 streamDeck.connect();

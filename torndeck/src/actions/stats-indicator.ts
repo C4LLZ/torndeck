@@ -1,57 +1,80 @@
-import {
-  action,
-  WillAppearEvent,
-  KeyUpEvent,
-  DidReceiveSettingsEvent,
-  SingletonAction
-} from "@elgato/streamdeck";
-import { fetchTornStats, TornStats } from "../torn/api";
+import streamDeck, { action, KeyAction } from "@elgato/streamdeck";
+import { PollingAction } from "../lib/polling-action";
+import { BlinkController } from "../lib/blink";
+import { fetchTornStats, TornApiError, TornBar } from "../torn/api";
+import { getApiKey } from "../torn/settings";
+import { renderStatsSvg } from "../torn/render";
 
 type StatsSettings = {
-  apiKey?:     string;
-  showEnergy?: boolean;
-  showNerve?:  boolean;
+  showEnergy?:      boolean;
+  showNerve?:       boolean;
+  showHappy?:       boolean;
+  showLife?:        boolean;
+  showNumbers?:     boolean;
+  refreshSeconds?:  number;
+  alertEnergyFull?: boolean;
+  alertNerveFull?:  boolean;
+  alertHappyFull?:  boolean;
+  alertLifeFull?:   boolean;
 };
 
+/**
+ * True only exactly at the bar's normal cap - not above it. Torn lets you stack a bar (e.g.
+ * energy) past its usual maximum for things like a ranked war, and that's deliberate, so the
+ * "you're full, go spend it" alert should stop once you've pushed past 100%, not keep flashing.
+ */
+function isFull(bar: TornBar): boolean {
+  return bar.maximum > 0 && bar.current === bar.maximum;
+}
+
 @action({ UUID: "com.callz.torndeck.statsindicator" })
-export class StatsIndicator extends SingletonAction<StatsSettings> {
-  override async onWillAppear(ev: WillAppearEvent<StatsSettings>) {
-    await ev.action.setTitle("Loading…");
-    await this.update(ev.payload.settings, ev.action);
+export class StatsIndicator extends PollingAction<StatsSettings> {
+  protected readonly defaultRefreshSeconds = 60;
+  protected readonly minRefreshSeconds = 30;
+
+  private readonly blink = new BlinkController();
+
+  protected override onStop(actionId: string): void {
+    this.blink.stop(actionId);
   }
 
-  override async onKeyUp(ev: KeyUpEvent<StatsSettings>) {
-    await ev.action.setTitle("Loading…");
-    await this.update(ev.payload.settings, ev.action);
+  protected override async onKeyPress(action: KeyAction<StatsSettings>, settings: StatsSettings): Promise<void> {
+    if (this.blink.isActive(action.id)) {
+      this.blink.acknowledge(action);
+      return;
+    }
+    await this.refresh(action, settings, true);
   }
 
-  override async onDidReceiveSettings(
-    ev: DidReceiveSettingsEvent<StatsSettings>
-  ) {
-    await ev.action.setTitle("Loading…");
-    await this.update(ev.payload.settings, ev.action);
-  }
-
-  private async update(
-    settings: StatsSettings,
-    actionInstance: typeof this["action"]
-  ) {
-    const { apiKey, showEnergy = true, showNerve = true } = settings;
-
+  protected override async refresh(action: KeyAction<StatsSettings>, settings: StatsSettings, manual: boolean): Promise<void> {
+    const apiKey = await getApiKey();
     if (!apiKey) {
-      await actionInstance.setTitle("No API key");
+      await action.setTitle("No API key");
       return;
     }
 
     try {
-      const stats: TornStats = await fetchTornStats(apiKey);
-      const parts: string[] = [];
-      if (showEnergy) parts.push(`⚡${stats.energy}`);
-      if (showNerve)  parts.push(`🧠${stats.nerve}`);
-      await actionInstance.setTitle(parts.join(" | "));
+      const stats = await fetchTornStats(apiKey);
+      await action.setTitle("");
+
+      const alertActive =
+        ((settings.alertEnergyFull ?? true) && isFull(stats.energy)) ||
+        ((settings.alertNerveFull ?? true) && isFull(stats.nerve)) ||
+        ((settings.alertHappyFull ?? false) && isFull(stats.happy)) ||
+        ((settings.alertLifeFull ?? false) && isFull(stats.life));
+
+      if (alertActive) {
+        this.blink.set(action, renderStatsSvg(stats, settings, false), renderStatsSvg(stats, settings, true));
+      } else {
+        this.blink.reset(action.id);
+        await action.setImage(renderStatsSvg(stats, settings, false));
+      }
+
+      if (manual) await action.showOk();
     } catch (err) {
-      console.error("Fetch error:", err);
-      await actionInstance.setTitle("Error");
+      streamDeck.logger.error("Failed to refresh Torn stats:", err);
+      await action.setTitle(err instanceof TornApiError ? err.message : "Fetch failed");
+      if (manual) await action.showAlert();
     }
   }
 }

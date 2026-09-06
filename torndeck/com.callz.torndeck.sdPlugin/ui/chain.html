@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Chain Settings</title>
+  <script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+  <style>
+    .hint { opacity: 0.6; font-size: 11px; margin: 0; }
+  </style>
+</head>
+<body>
+  <sdpi-item label="Torn API Key">
+    <sdpi-textfield setting="apiKey" global placeholder="Your Torn API key"></sdpi-textfield>
+  </sdpi-item>
+  <sdpi-item>
+    <p class="hint">Shared by every TornDeck key - enter it once.</p>
+  </sdpi-item>
+
+  <sdpi-item label="Sync every (sec)">
+    <sdpi-textfield setting="refreshSeconds" placeholder="20" pattern="[0-9]*"></sdpi-textfield>
+  </sdpi-item>
+  <sdpi-item>
+    <p class="hint">Minimum 15s. The countdown ticks every second locally - this only controls how often it re-syncs with Torn.</p>
+  </sdpi-item>
+
+  <sdpi-item label="Flash when under (sec)">
+    <sdpi-textfield setting="flashThresholdSeconds" placeholder="60" pattern="[0-9]*"></sdpi-textfield>
+  </sdpi-item>
+  <sdpi-item>
+    <p class="hint">Starts flashing once this many seconds are left before the chain would drop. Long-press any TornDeck key to jump straight to Torn.</p>
+  </sdpi-item>
+</body>
+</html>
