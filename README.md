@@ -6,19 +6,16 @@ A Stream Deck plugin that puts live [Torn](https://www.torn.com) data on your de
 
 ## Features
 
-| | | |
-|---|---|---|
-| ![Stats](docs/screenshots/stats.png) | ![Flight](docs/screenshots/flight.png) | ![Notifications](docs/screenshots/notifications.png) |
-| **Stats Indicator** — live Energy/Nerve/Happy/Life bars with real Torn icons, optional current/max numbers, and a notification badge. Flashes when a bar hits its normal cap (won't flash if you've stacked past it, e.g. for a ranked war). | **Flight Status** — a plane flying through the clouds along your route, with a live countdown. Shows the destination flag, and switches to an "Abroad" card once you've landed and are staying put. | **Notifications** — unread event/message/award/competition count, flashing until dismissed. |
-| ![Chain](docs/screenshots/chain.png) | ![Hospital](docs/screenshots/hospital.png) | ![Cooldowns](docs/screenshots/cooldowns.png) |
-| **Chain** — live hit count and countdown, flashing once it's close to dropping (threshold you set). | **Hospital** — live release countdown, flashing once you're close (threshold you set). | **Cooldowns** — drug/booster/medical countdown (pick which one per key), flashing once ready. |
-| ![Refills](docs/screenshots/refills.png) | | |
-| **Refills** — shows whether today's free energy/nerve refill has been used, flashing while it's still available. | | |
-
-Every key also supports:
-- **Long-press to open a URL** — defaults to torn.com, or point it at any page you want.
-- **A "flash for alerts" toggle** — turn off the blinking entirely and just get the steady visual.
-- **One shared API key** — enter it once (masked like a password field), every key uses it.
+| | |
+|---|---|
+| ![Stats](docs/screenshots/stats.png) | ![Flight](docs/screenshots/flight.png) |
+| **Stats Indicator** — live Energy/Nerve/Happy/Life bars with real Torn icons, optional current/max numbers, and a notification badge. Flashes when a bar hits its normal cap (won't flash if you've stacked past it, e.g. for a ranked war). | **Flight Status** — a plane flying through the clouds along your route, with a live countdown. Shows the destination flag, and switches to an "Abroad" card once you've landed and are staying put. |
+| ![Notifications](docs/screenshots/notifications.png) | ![Chain](docs/screenshots/chain.png) |
+| **Notifications** — unread event/message/award/competition count, flashing until dismissed. | **Chain** — live hit count and countdown, flashing once it's close to dropping (threshold you set). |
+| ![Hospital](docs/screenshots/hospital.png) | ![Cooldowns](docs/screenshots/cooldowns.png) |
+| **Hospital** — live release countdown, flashing once you're close (threshold you set). | **Cooldowns** — drug/booster/medical countdown (pick which one per key), flashing once ready. |
+| ![Refills](docs/screenshots/refills.png) | ![Every key](docs/screenshots/every-key.png) |
+| **Refills** — shows whether today's free energy/nerve refill has been used, flashing while it's still available. | **Every key** — long-press to open a URL (defaults to torn.com, or point it anywhere), a flash-for-alerts on/off toggle, and one shared API key entered once (masked like a password field) for every action. |
 
 ## Setup
 
