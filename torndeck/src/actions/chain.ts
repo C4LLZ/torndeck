@@ -7,7 +7,6 @@ import { nowSeconds } from "../torn/clock";
 import { renderChainActiveSvg, renderChainIdleSvg } from "../torn/render-chain";
 
 type ChainSettings = {
-  refreshSeconds?: number;
   /** Start flashing once this many seconds are left before the chain drops. */
   flashThresholdSeconds?: number;
   flashEnabled?: boolean;

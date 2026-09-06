@@ -8,7 +8,6 @@ import { renderCooldownSvg } from "../torn/render-cooldowns";
 
 type CooldownsSettings = {
   cooldownType?: TornCooldownType;
-  refreshSeconds?: number;
   flashEnabled?: boolean;
   longPressUrl?: string;
 };

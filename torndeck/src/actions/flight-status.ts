@@ -7,7 +7,6 @@ import { nowSeconds } from "../torn/clock";
 import { isAbroad, renderFlightAbroadSvg, renderFlightIdleSvg, renderFlightLandedSvg, renderFlightProgressSvg } from "../torn/render-flight";
 
 type FlightSettings = {
-  refreshSeconds?: number;
   flashEnabled?:   boolean;
   longPressUrl?:   string;
 };

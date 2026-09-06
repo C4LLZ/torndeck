@@ -10,17 +10,10 @@
 </head>
 <body>
   <sdpi-item label="Torn API Key">
-    <sdpi-textfield setting="apiKey" global placeholder="Your Torn API key"></sdpi-textfield>
+    <sdpi-password setting="apiKey" global placeholder="Your Torn API key"></sdpi-password>
   </sdpi-item>
   <sdpi-item>
     <p class="hint">Shared by every TornDeck key - enter it once.</p>
-  </sdpi-item>
-
-  <sdpi-item label="Sync every (sec)">
-    <sdpi-textfield setting="refreshSeconds" placeholder="30" pattern="[0-9]*"></sdpi-textfield>
-  </sdpi-item>
-  <sdpi-item>
-    <p class="hint">Minimum 20s. The countdown itself ticks every second locally - this only controls how often it re-syncs with Torn, e.g. to notice a newly booked flight.</p>
   </sdpi-item>
 
   <sdpi-item>

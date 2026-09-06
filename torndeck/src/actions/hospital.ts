@@ -7,7 +7,6 @@ import { nowSeconds } from "../torn/clock";
 import { renderHospitalActiveSvg, renderHospitalIdleSvg } from "../torn/render-hospital";
 
 type HospitalSettings = {
-  refreshSeconds?: number;
   /** Start flashing once this many minutes are left before release. */
   flashThresholdMinutes?: number;
   flashEnabled?: boolean;
