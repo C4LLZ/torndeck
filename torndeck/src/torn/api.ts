@@ -124,18 +124,6 @@ function fetchTornSelectionsCached<T extends RawErrorResponse>(apiKey: string, s
   return cached(`${apiKey}:${withClock}`, ttlMs, () => fetchTornSelections<T>(apiKey, withClock));
 }
 
-/**
- * Cache TTLs are matched to the fastest fixed poll interval among each selection's consumers (see
- * the `defaultRefreshSeconds` on each action), not set arbitrarily short - a TTL shorter than the
- * poll cycle means multiple same-selection instances (e.g. all three Cooldowns keys) drift in and
- * out of "fresh" independently and end up double-fetching instead of sharing one request.
- */
-const BARS_NOTIFICATIONS_TTL_MS = 20_000; // Chain polls every 20s, the fastest of that shared cluster
-const TRAVEL_TTL_MS = 30_000; // Flight polls every 30s
-const BASIC_TTL_MS = 60_000; // Hospital polls every 60s
-const COOLDOWNS_TTL_MS = 30_000; // Cooldowns polls every 30s - matters most with all 3 keys placed
-const REFILLS_TTL_MS = 55_000;
-
 interface RawBar {
   current?: number;
   maximum?: number;
@@ -149,7 +137,18 @@ interface RawChain {
   timeout?: number;
 }
 
-interface RawBarsNotificationsResponse extends RawErrorResponse {
+/** Every selection any TornDeck action needs, fetched together in one request. */
+const ALL_SELECTIONS = "bars,notifications,cooldowns,refills,basic,travel";
+
+/**
+ * Matched to Chain's default poll interval, the fastest of the bunch, so nothing gets staler than
+ * it already was. Whatever mix of keys are on the deck (Stats, Flight, Chain, Hospital, Cooldowns,
+ * Refills, Notifications), they all share this single cache entry instead of each selection group
+ * fetching on its own schedule - one real HTTP request per TTL window, full stop.
+ */
+const ALL_TTL_MS = 20_000;
+
+interface RawAllResponse extends RawErrorResponse {
   energy?: RawBar;
   nerve?: RawBar;
   happy?: RawBar;
@@ -161,6 +160,27 @@ interface RawBarsNotificationsResponse extends RawErrorResponse {
     awards?: number;
     competition?: number;
   };
+  status?: {
+    state?: string;
+    description?: string;
+    until?: number;
+  };
+  travel?: {
+    destination?: string;
+    method?: string;
+    departed?: number;
+    timestamp?: number;
+    time_left?: number;
+  };
+  cooldowns?: {
+    drug?: number;
+    booster?: number;
+    medical?: number;
+  };
+  refills?: {
+    energy_refill_used?: boolean;
+    nerve_refill_used?: boolean;
+  };
 }
 
 function toBar(raw: RawBar | undefined): TornBar {
@@ -171,7 +191,7 @@ function toBar(raw: RawBar | undefined): TornBar {
   };
 }
 
-function toNotifications(raw: RawBarsNotificationsResponse["notifications"]): TornNotifications {
+function toNotifications(raw: RawAllResponse["notifications"]): TornNotifications {
   return {
     events: raw?.events ?? 0,
     messages: raw?.messages ?? 0,
@@ -180,13 +200,17 @@ function toNotifications(raw: RawBarsNotificationsResponse["notifications"]): To
   };
 }
 
-/** Fetches (or reuses a still-fresh cached copy of) the combined bars+notifications selections - the shared source for Stats, Chain, and Notifications. */
-function fetchBarsAndNotifications(apiKey: string): Promise<RawBarsNotificationsResponse> {
-  return fetchTornSelectionsCached<RawBarsNotificationsResponse>(apiKey, "bars,notifications", BARS_NOTIFICATIONS_TTL_MS);
+/**
+ * Fetches (or reuses a still-fresh cached copy of) every selection every action needs, in one
+ * request - the single shared source for all seven TornDeck actions, so however many keys are on
+ * the deck, there's still only one real HTTP request per {@link ALL_TTL_MS} window.
+ */
+function fetchAll(apiKey: string): Promise<RawAllResponse> {
+  return fetchTornSelectionsCached<RawAllResponse>(apiKey, ALL_SELECTIONS, ALL_TTL_MS);
 }
 
 export async function fetchTornStats(apiKey: string): Promise<TornStats> {
-  const d = await fetchBarsAndNotifications(apiKey);
+  const d = await fetchAll(apiKey);
 
   return {
     energy: toBar(d.energy),
@@ -198,12 +222,12 @@ export async function fetchTornStats(apiKey: string): Promise<TornStats> {
 }
 
 export async function fetchTornNotifications(apiKey: string): Promise<TornNotifications> {
-  const d = await fetchBarsAndNotifications(apiKey);
+  const d = await fetchAll(apiKey);
   return toNotifications(d.notifications);
 }
 
 export async function fetchTornChain(apiKey: string): Promise<TornChain> {
-  const d = await fetchBarsAndNotifications(apiKey);
+  const d = await fetchAll(apiKey);
   return {
     current: d.chain?.current ?? 0,
     maximum: d.chain?.maximum ?? 0,
@@ -212,16 +236,8 @@ export async function fetchTornChain(apiKey: string): Promise<TornChain> {
   };
 }
 
-interface RawBasicResponse extends RawErrorResponse {
-  status?: {
-    state?: string;
-    description?: string;
-    until?: number;
-  };
-}
-
 export async function fetchTornStatus(apiKey: string): Promise<TornStatus> {
-  const d = await fetchTornSelectionsCached<RawBasicResponse>(apiKey, "basic", BASIC_TTL_MS);
+  const d = await fetchAll(apiKey);
   return {
     state: (d.status?.state as TornStatusState) ?? "Okay",
     description: d.status?.description ?? "",
@@ -229,26 +245,8 @@ export async function fetchTornStatus(apiKey: string): Promise<TornStatus> {
   };
 }
 
-interface RawTravelResponse extends RawErrorResponse {
-  travel?: {
-    destination?: string;
-    method?: string;
-    departed?: number;
-    timestamp?: number;
-    time_left?: number;
-  };
-}
-
-interface RawCooldownsResponse extends RawErrorResponse {
-  cooldowns?: {
-    drug?: number;
-    booster?: number;
-    medical?: number;
-  };
-}
-
 export async function fetchTornCooldowns(apiKey: string): Promise<TornCooldowns> {
-  const d = await fetchTornSelectionsCached<RawCooldownsResponse>(apiKey, "cooldowns", COOLDOWNS_TTL_MS);
+  const d = await fetchAll(apiKey);
   return {
     drug: d.cooldowns?.drug ?? 0,
     booster: d.cooldowns?.booster ?? 0,
@@ -256,15 +254,8 @@ export async function fetchTornCooldowns(apiKey: string): Promise<TornCooldowns>
   };
 }
 
-interface RawRefillsResponse extends RawErrorResponse {
-  refills?: {
-    energy_refill_used?: boolean;
-    nerve_refill_used?: boolean;
-  };
-}
-
 export async function fetchTornRefills(apiKey: string): Promise<TornRefills> {
-  const d = await fetchTornSelectionsCached<RawRefillsResponse>(apiKey, "refills", REFILLS_TTL_MS);
+  const d = await fetchAll(apiKey);
   return {
     energy: d.refills?.energy_refill_used ?? false,
     nerve: d.refills?.nerve_refill_used ?? false,
@@ -272,7 +263,7 @@ export async function fetchTornRefills(apiKey: string): Promise<TornRefills> {
 }
 
 export async function fetchTornTravel(apiKey: string): Promise<TornTravel> {
-  const d = await fetchTornSelectionsCached<RawTravelResponse>(apiKey, "travel", TRAVEL_TTL_MS);
+  const d = await fetchAll(apiKey);
   const t = d.travel;
 
   return {
