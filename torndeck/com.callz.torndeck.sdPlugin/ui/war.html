@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>War Settings</title>
+  <script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+  <style>
+    .hint { opacity: 0.6; font-size: 11px; margin: 0; }
+  </style>
+</head>
+<body>
+  <sdpi-item label="Torn API Key">
+    <sdpi-password setting="apiKey" global placeholder="Your Torn API key"></sdpi-password>
+  </sdpi-item>
+  <sdpi-item>
+    <p class="hint">Shared by every TornDeck key - enter it once.</p>
+  </sdpi-item>
+  <sdpi-item>
+    <p class="hint">Shows your faction's ranked war lead: green when you're ahead, red when behind. Uses one extra faction request every 30s.</p>
+  </sdpi-item>
+
+  <sdpi-item label="Long-press opens">
+    <sdpi-textfield setting="longPressUrl" placeholder="https://www.torn.com"></sdpi-textfield>
+  </sdpi-item>
+  <sdpi-item>
+    <p class="hint">Leave blank to open torn.com (default).</p>
+  </sdpi-item>
+</body>
+</html>

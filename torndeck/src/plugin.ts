@@ -6,6 +6,8 @@ import { Chain } from "./actions/chain";
 import { Hospital } from "./actions/hospital";
 import { Cooldowns } from "./actions/cooldowns";
 import { Refills } from "./actions/refills";
+import { Status } from "./actions/status";
+import { War } from "./actions/war";
 
 streamDeck.logger.setLevel("trace");
 
@@ -16,5 +18,7 @@ streamDeck.actions.registerAction(new Chain());
 streamDeck.actions.registerAction(new Hospital());
 streamDeck.actions.registerAction(new Cooldowns());
 streamDeck.actions.registerAction(new Refills());
+streamDeck.actions.registerAction(new Status());
+streamDeck.actions.registerAction(new War());
 
 streamDeck.connect();

@@ -32,7 +32,7 @@ export interface TornChain {
   timeout: number;
 }
 
-export type TornStatusState = "Abroad" | "Fallen" | "Federal" | "Hospital" | "Jail" | "Okay" | "Traveling" | string;
+export type TornStatusState = "Abroad" | "Fallen" | "Hospital" | "Jail" | "Okay" | "Traveling" | string;
 
 export interface TornStatus {
   state: TornStatusState;
@@ -94,9 +94,9 @@ function logApiCall(selections: string): void {
   streamDeck.logger.info(`Torn API request: ${selections} (${recentCallTimestamps.length} requests in the last 60s)`);
 }
 
-async function fetchTornSelections<T extends RawErrorResponse>(apiKey: string, selections: string): Promise<T> {
+async function fetchTornSelections<T extends RawErrorResponse>(apiKey: string, selections: string, scope: "user" | "faction"): Promise<T> {
   logApiCall(selections);
-  const url = `https://api.torn.com/user/?selections=${selections}&key=${encodeURIComponent(apiKey)}`;
+  const url = `https://api.torn.com/${scope}/?selections=${selections}&key=${encodeURIComponent(apiKey)}`;
   const res = await fetch(url);
 
   if (!res.ok) {
@@ -119,9 +119,9 @@ async function fetchTornSelections<T extends RawErrorResponse>(apiKey: string, s
  * for the same (or an overlapping) selection set within that window share one real HTTP request.
  * Every call also requests the `timestamp` selection, to keep {@link syncServerTime} up to date.
  */
-function fetchTornSelectionsCached<T extends RawErrorResponse>(apiKey: string, selections: string, ttlMs: number): Promise<T> {
+function fetchTornSelectionsCached<T extends RawErrorResponse>(apiKey: string, selections: string, ttlMs: number, scope: "user" | "faction" = "user"): Promise<T> {
   const withClock = `${selections},timestamp`;
-  return cached(`${apiKey}:${withClock}`, ttlMs, () => fetchTornSelections<T>(apiKey, withClock));
+  return cached(`${apiKey}:${scope}:${withClock}`, ttlMs, () => fetchTornSelections<T>(apiKey, withClock, scope));
 }
 
 interface RawBar {
@@ -273,4 +273,37 @@ export async function fetchTornTravel(apiKey: string): Promise<TornTravel> {
     timestamp: t?.timestamp ?? 0,
     timeLeft: t?.time_left ?? 0,
   };
+}
+
+export interface TornWar {
+  /** Our score minus theirs; positive means we're winning. */
+  lead: number;
+  ours: number;
+  theirs: number;
+  target: number;
+  /** Epoch seconds the war starts; in the future while it's still the pre-war countdown. */
+  start: number;
+  enemyName: string;
+}
+
+interface RawFactionBasicResponse extends RawErrorResponse {
+  ID?: number;
+  ranked_wars?: Record<string, {
+    factions?: Record<string, { name?: string; score?: number }>;
+    war?: { start?: number; end?: number; target?: number };
+  }>;
+}
+
+/** Our faction's active ranked war (from the faction endpoint - a separate request from the shared user call), or null when there isn't one. */
+export async function fetchTornWar(apiKey: string): Promise<TornWar | null> {
+  const d = await fetchTornSelectionsCached<RawFactionBasicResponse>(apiKey, "basic", 30_000, "faction");
+  const active = Object.values(d.ranked_wars ?? {}).find((w) => !w.war?.end);
+  if (!active) return null;
+
+  const entries = Object.entries(active.factions ?? {});
+  const us = entries.find(([id]) => Number(id) === d.ID)?.[1];
+  const them = entries.find(([id]) => Number(id) !== d.ID)?.[1];
+  const ours = us?.score ?? 0;
+  const theirs = them?.score ?? 0;
+  return { lead: ours - theirs, ours, theirs, target: active.war?.target ?? 0, start: active.war?.start ?? 0, enemyName: them?.name ?? "" };
 }

@@ -26,7 +26,7 @@ const COUNTRY_FLAGS: Record<string, string> = {
   "south africa": "🇿🇦",
 };
 
-function flagFor(destination: string): string {
+export function flagFor(destination: string): string {
   return COUNTRY_FLAGS[destination.trim().toLowerCase()] ?? "";
 }
 

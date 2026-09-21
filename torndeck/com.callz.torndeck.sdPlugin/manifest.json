@@ -1,6 +1,6 @@
 {
 	"Name": "TornDeck",
-	"Version": "1.0.2.0",
+	"Version": "1.0.3.0",
 	"Author": "Callz",
 	"Actions": [
 		{
@@ -111,6 +111,38 @@
 			"States": [
 				{
 					"Image": "imgs/actions/refills/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Status",
+			"UUID": "com.callz.torndeck.status",
+			"Icon": "imgs/actions/status/icon",
+			"Tooltip": "Your current Torn status in one key: flying, hospital, jail, abroad, or okay. Shows the country when hospitalised abroad.",
+			"PropertyInspectorPath": "ui/status.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/status/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "War",
+			"UUID": "com.callz.torndeck.war",
+			"Icon": "imgs/actions/war/icon",
+			"Tooltip": "Your faction's ranked war lead. Green background when you're winning, red when losing.",
+			"PropertyInspectorPath": "ui/war.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/war/key",
 					"TitleAlignment": "middle"
 				}
 			]
