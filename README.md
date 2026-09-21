@@ -1,6 +1,6 @@
 # TornDeck
 
-A Stream Deck plugin that puts live [Torn](https://www.torn.com) data on your deck — stats, flight and status tracking, chain and hospital countdowns, cooldowns, refills, ranked war lead, and notifications, all synced to Torn's own server clock.
+A Stream Deck plugin that puts live [Torn](https://www.torn.com) data on your deck — stats, flight and status tracking, chain and hospital countdowns, cooldowns, refills, ranked war lead, a TCT clock, and notifications, all synced to Torn's own server clock.
 
 > **Unofficial fan-made tool.** Not affiliated with, endorsed by, or associated with Torn.com in any way. Uses the public Torn API with a key you provide yourself.
 
@@ -11,13 +11,20 @@ A Stream Deck plugin that puts live [Torn](https://www.torn.com) data on your de
 | ![Stats](docs/screenshots/stats.png) | ![Flight](docs/screenshots/flight.png) |
 | **Stats Indicator** — live Energy/Nerve/Happy/Life bars with real Torn icons, optional current/max numbers, and a notification badge. Flashes when a bar hits its normal cap (won't flash if you've stacked past it, e.g. for a ranked war). | **Flight Status** — a plane flying through the clouds along your route, with a live countdown. Shows the destination flag, and switches to an "Abroad" card once you've landed and are staying put. |
 | ![Status](docs/screenshots/status.png) | ![War](docs/screenshots/war.png) |
-| **Status** — one key for whatever you're currently doing: flying (plane, countdown, destination flag), hospital (countdown, plus a faded flag and the country name if you're hospitalised abroad), jail, abroad, or okay. Flashes when hospital/jail is nearly over (threshold you set) and when you land. | **War** — your faction's ranked war lead: green background when you're winning, red when you're losing, with both scores and the war target (or a countdown until it starts). Uses one extra faction API request every 30s, only while a War key is on your deck. |
+| **Status** — one key for whatever you're currently doing: flying (plane, countdown, destination flag), hospital (countdown, plus a faded flag and the country name if you're hospitalised abroad), jail, abroad, or okay. Optionally shows the current TCT time along the top. Flashes when hospital/jail is nearly over (threshold you set) and when you land. | **War** — your faction's ranked war lead: green background when you're winning, red when you're losing, with both scores and the war target (or a countdown until it starts). Uses one extra faction API request every 30s, only while a War key is on your deck. |
 | ![Notifications](docs/screenshots/notifications.png) | ![Chain](docs/screenshots/chain.png) |
 | **Notifications** — unread event/message/award/competition count, flashing until dismissed. | **Chain** — live hit count and countdown, flashing once it's close to dropping (threshold you set). |
 | ![Hospital](docs/screenshots/hospital.png) | ![Cooldowns](docs/screenshots/cooldowns-combined.png) |
 | **Hospital** — live release countdown, flashing once you're close (threshold you set). | **Cooldowns** — drug/booster/medical countdown, one per key, or switch a key to **Combined** to show several as colour-coded rows at once (drug, booster, medical, and optionally hospital — you pick which rows). Flashes when a cooldown finishes. |
-| ![Refills](docs/screenshots/refills.png) | ![Every key](docs/screenshots/every-key.png) |
-| **Refills** — shows whether today's free energy/nerve refill has been used, flashing while it's still available. | **Every key** — long-press to open a URL (defaults to torn.com, or point it anywhere), a flash-for-alerts on/off toggle, and one shared API key entered once (masked like a password field) for every action. |
+| ![Refills](docs/screenshots/refills.png) | ![TCT](docs/screenshots/tct.png) |
+| **Refills** — shows whether today's free energy/nerve refill has been used, flashing while it's still available. | **TCT Clock** — Torn City Time (UTC) with the date and a countdown to the daily reset. Needs no API key and makes no API requests. |
+
+Every key also supports:
+- **Long-press to open a URL** — defaults to torn.com, or point it at any page you want.
+- **A "flash for alerts" toggle** — turn off the blinking entirely and just get the steady visual (where the key flashes).
+- **One shared API key** — enter it once (masked like a password field), every key uses it.
+
+The Status key also has an optional **Show time above status** setting that adds a small TCT time along the top of the key.
 
 ## Setup
 

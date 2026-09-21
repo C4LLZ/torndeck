@@ -6,16 +6,20 @@ import { getApiKey } from "../torn/settings";
 import { nowSeconds } from "../torn/clock";
 import { isAbroad, renderFlightAbroadSvg, renderFlightLandedSvg, renderFlightProgressSvg } from "../torn/render-flight";
 import { renderStatusStaticSvg, renderTimerSvg, TimerKind } from "../torn/render-status";
+import { withTct } from "../torn/render-tct";
 
 type StatusSettings = {
   /** Start flashing once this many minutes are left in hospital/jail. */
   flashThresholdMinutes?: number;
+  /** Show a small TCT time along the top of every status card. */
+  showTct?: boolean;
   flashEnabled?: boolean;
   longPressUrl?: string;
 };
 
 type Mode =
   | { kind: "flight"; destination: string; departed: number; arrival: number; landed: boolean }
+  | { kind: "static"; render: () => string }
   | { kind: TimerKind; until: number; country?: string };
 
 const DEFAULT_FLASH_THRESHOLD_MINUTES = 5;
@@ -29,6 +33,11 @@ export class Status extends PollingAction<StatusSettings> {
   private readonly modes = new Map<string, Mode>();
   private readonly ticks = new Map<string, ReturnType<typeof setInterval>>();
   private readonly blink = new BlinkController();
+
+  /** Adds the small TCT time to a rendered card when the user has that option on. */
+  private img(settings: StatusSettings, uri: string, flash = false): string {
+    return settings.showTct ? withTct(uri, nowSeconds(), flash) : uri;
+  }
 
   protected override onStop(actionId: string): void {
     this.stopTicking(actionId);
@@ -76,7 +85,14 @@ export class Status extends PollingAction<StatusSettings> {
         this.modes.delete(action.id);
         this.blink.reset(action.id);
         const state = status.state === "Hospital" || status.state === "Jail" ? "Okay" : status.state;
-        await action.setImage(state === "Abroad" ? renderFlightAbroadSvg(travel.destination) : renderStatusStaticSvg(state));
+        const render = () => (state === "Abroad" ? renderFlightAbroadSvg(travel.destination) : renderStatusStaticSvg(state));
+        if (settings.showTct) {
+          // Static cards only need a per-second tick so the TCT minute stays current.
+          this.modes.set(action.id, { kind: "static", render });
+          this.ensureTicking(action, settings);
+        } else {
+          await action.setImage(render());
+        }
       }
 
       if (manual) await action.showOk();
@@ -103,15 +119,20 @@ export class Status extends PollingAction<StatusSettings> {
     const mode = this.modes.get(action.id);
     if (!mode) return;
 
+    if (mode.kind === "static") {
+      void action.setImage(this.img(settings, mode.render()));
+      return;
+    }
+
     if (mode.kind === "flight") {
       if (mode.landed) return;
       if (mode.arrival - nowSeconds() <= 0) {
         mode.landed = true;
         this.stopTicking(action.id);
-        this.blink.set(action, renderFlightLandedSvg(mode.destination, false), renderFlightLandedSvg(mode.destination, true), flashEnabledOf(settings));
+        this.blink.set(action, this.img(settings, renderFlightLandedSvg(mode.destination, false)), this.img(settings, renderFlightLandedSvg(mode.destination, true), true), flashEnabledOf(settings));
         return;
       }
-      void action.setImage(renderFlightProgressSvg({ destination: mode.destination, departed: mode.departed, arrival: mode.arrival }));
+      void action.setImage(this.img(settings, renderFlightProgressSvg({ destination: mode.destination, departed: mode.departed, arrival: mode.arrival })));
       return;
     }
 
@@ -126,10 +147,10 @@ export class Status extends PollingAction<StatusSettings> {
 
     const threshold = Math.max(1, settings.flashThresholdMinutes ?? DEFAULT_FLASH_THRESHOLD_MINUTES) * 60;
     if (remaining <= threshold) {
-      this.blink.set(action, renderTimerSvg(mode.kind, remaining, false, mode.country), renderTimerSvg(mode.kind, remaining, true, mode.country), flashEnabledOf(settings));
+      this.blink.set(action, this.img(settings, renderTimerSvg(mode.kind, remaining, false, mode.country)), this.img(settings, renderTimerSvg(mode.kind, remaining, true, mode.country), true), flashEnabledOf(settings));
     } else {
       this.blink.reset(action.id);
-      void action.setImage(renderTimerSvg(mode.kind, remaining, false, mode.country));
+      void action.setImage(this.img(settings, renderTimerSvg(mode.kind, remaining, false, mode.country)));
     }
   }
 }

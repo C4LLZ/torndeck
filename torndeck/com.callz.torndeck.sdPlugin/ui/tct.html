@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>TCT Settings</title>
+  <script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+  <style>
+    .hint { opacity: 0.6; font-size: 11px; margin: 0; }
+  </style>
+</head>
+<body>
+  <sdpi-item>
+    <p class="hint">Torn City Time (UTC) with a countdown to the daily reset. Needs no API key and makes no API requests.</p>
+  </sdpi-item>
+
+  <sdpi-item label="Long-press opens">
+    <sdpi-textfield setting="longPressUrl" placeholder="https://www.torn.com"></sdpi-textfield>
+  </sdpi-item>
+  <sdpi-item>
+    <p class="hint">Leave blank to open torn.com (default).</p>
+  </sdpi-item>
+</body>
+</html>

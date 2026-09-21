@@ -1,6 +1,6 @@
 {
 	"Name": "TornDeck",
-	"Version": "1.0.3.0",
+	"Version": "1.0.4.0",
 	"Author": "Callz",
 	"Actions": [
 		{
@@ -143,6 +143,22 @@
 			"States": [
 				{
 					"Image": "imgs/actions/war/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "TCT Clock",
+			"UUID": "com.callz.torndeck.tct",
+			"Icon": "imgs/actions/tct/icon",
+			"Tooltip": "Torn City Time (UTC) with a countdown to the daily reset. No API key needed.",
+			"PropertyInspectorPath": "ui/tct.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/tct/key",
 					"TitleAlignment": "middle"
 				}
 			]

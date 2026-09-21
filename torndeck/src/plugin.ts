@@ -8,6 +8,7 @@ import { Cooldowns } from "./actions/cooldowns";
 import { Refills } from "./actions/refills";
 import { Status } from "./actions/status";
 import { War } from "./actions/war";
+import { Tct } from "./actions/tct";
 
 streamDeck.logger.setLevel("trace");
 
@@ -20,5 +21,6 @@ streamDeck.actions.registerAction(new Cooldowns());
 streamDeck.actions.registerAction(new Refills());
 streamDeck.actions.registerAction(new Status());
 streamDeck.actions.registerAction(new War());
+streamDeck.actions.registerAction(new Tct());
 
 streamDeck.connect();
