@@ -97,7 +97,9 @@ function logApiCall(selections: string): void {
 async function fetchTornSelections<T extends RawErrorResponse>(apiKey: string, selections: string, scope: "user" | "faction"): Promise<T> {
   logApiCall(selections);
   const url = `https://api.torn.com/${scope}/?selections=${selections}&key=${encodeURIComponent(apiKey)}`;
+  const sentAt = Date.now();
   const res = await fetch(url);
+  const receivedAt = Date.now();
 
   if (!res.ok) {
     throw new Error(`Torn API HTTP ${res.status}`);
@@ -109,7 +111,7 @@ async function fetchTornSelections<T extends RawErrorResponse>(apiKey: string, s
     throw new TornApiError(d.error.code, d.error.error ?? `Torn API error ${d.error.code}`);
   }
 
-  if (typeof d.timestamp === "number") syncServerTime(d.timestamp);
+  if (typeof d.timestamp === "number") syncServerTime(d.timestamp, sentAt, receivedAt);
 
   return d;
 }

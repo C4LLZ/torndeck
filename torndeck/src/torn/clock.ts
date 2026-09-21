@@ -7,8 +7,15 @@ let offsetSeconds = 0;
  * which can drift, run on the wrong timezone, or just be a few seconds off. This is what lets
  * Chain, Hospital, Cooldowns, and Flight all agree on "now."
  */
-export function syncServerTime(serverTimestampSeconds: number): void {
-  offsetSeconds = serverTimestampSeconds - Date.now() / 1000;
+export function syncServerTime(serverTimestampSeconds: number, requestSentMs: number, responseReceivedMs: number): void {
+  const roundTripMs = responseReceivedMs - requestSentMs;
+  // A slow round trip means an unreliable sample; keep the previous (better) offset instead.
+  if (roundTripMs > 3000) return;
+  // The server stamped the response somewhere mid-flight, so compare against the midpoint, not
+  // the arrival time. Torn's timestamp is whole seconds (truncated), so the true time is on
+  // average half a second later.
+  const localMidpointSeconds = (requestSentMs + responseReceivedMs) / 2000;
+  offsetSeconds = serverTimestampSeconds + 0.5 - localMidpointSeconds;
 }
 
 /** Current time in epoch seconds, corrected for any measured drift against Torn's server clock. */
