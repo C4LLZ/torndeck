@@ -121,9 +121,9 @@ async function fetchTornSelections<T extends RawErrorResponse>(apiKey: string, s
  * for the same (or an overlapping) selection set within that window share one real HTTP request.
  * Every call also requests the `timestamp` selection, to keep {@link syncServerTime} up to date.
  */
-function fetchTornSelectionsCached<T extends RawErrorResponse>(apiKey: string, selections: string, ttlMs: number, scope: "user" | "faction" = "user"): Promise<T> {
+function fetchTornSelectionsCached<T extends RawErrorResponse>(apiKey: string, selections: string, ttlMs: number, scope: "user" | "faction" = "user", force = false): Promise<T> {
   const withClock = `${selections},timestamp`;
-  return cached(`${apiKey}:${scope}:${withClock}`, ttlMs, () => fetchTornSelections<T>(apiKey, withClock, scope));
+  return cached(`${apiKey}:${scope}:${withClock}`, ttlMs, () => fetchTornSelections<T>(apiKey, withClock, scope), force);
 }
 
 interface RawBar {
@@ -207,8 +207,8 @@ function toNotifications(raw: RawAllResponse["notifications"]): TornNotification
  * request - the single shared source for all seven TornDeck actions, so however many keys are on
  * the deck, there's still only one real HTTP request per {@link ALL_TTL_MS} window.
  */
-function fetchAll(apiKey: string): Promise<RawAllResponse> {
-  return fetchTornSelectionsCached<RawAllResponse>(apiKey, ALL_SELECTIONS, ALL_TTL_MS);
+function fetchAll(apiKey: string, force = false): Promise<RawAllResponse> {
+  return fetchTornSelectionsCached<RawAllResponse>(apiKey, ALL_SELECTIONS, ALL_TTL_MS, "user", force);
 }
 
 export async function fetchTornStats(apiKey: string): Promise<TornStats> {
@@ -264,8 +264,8 @@ export async function fetchTornRefills(apiKey: string): Promise<TornRefills> {
   };
 }
 
-export async function fetchTornTravel(apiKey: string): Promise<TornTravel> {
-  const d = await fetchAll(apiKey);
+export async function fetchTornTravel(apiKey: string, force = false): Promise<TornTravel> {
+  const d = await fetchAll(apiKey, force);
   const t = d.travel;
 
   return {

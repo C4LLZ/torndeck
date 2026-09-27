@@ -1,10 +1,11 @@
 import streamDeck, { action, KeyAction } from "@elgato/streamdeck";
 import { flashEnabledOf, PollingAction } from "../lib/polling-action";
 import { BlinkController } from "../lib/blink";
-import { fetchTornTravel, TornApiError } from "../torn/api";
+import { fetchTornTravel, TornApiError, TornTravel } from "../torn/api";
 import { getApiKey } from "../torn/settings";
 import { nowSeconds } from "../torn/clock";
 import { isAbroad, renderFlightAbroadSvg, renderFlightIdleSvg, renderFlightLandedSvg, renderFlightProgressSvg } from "../torn/render-flight";
+import { LandingConfirmer } from "../lib/landing-confirm";
 
 type FlightSettings = {
   flashEnabled?:   boolean;
@@ -27,12 +28,14 @@ export class FlightStatus extends PollingAction<FlightSettings> {
   private readonly states = new Map<string, FlightState | undefined>();
   private readonly ticks = new Map<string, ReturnType<typeof setInterval>>();
   private readonly blink = new BlinkController();
+  private readonly landingConfirmer = new LandingConfirmer();
 
   protected override onStop(actionId: string): void {
     const tick = this.ticks.get(actionId);
     if (tick) clearInterval(tick);
     this.ticks.delete(actionId);
     this.blink.stop(actionId);
+    this.landingConfirmer.stop(actionId);
     this.states.delete(actionId);
   }
 
@@ -93,6 +96,10 @@ export class FlightStatus extends PollingAction<FlightSettings> {
     if (!state || state.landed) return;
 
     const remaining = state.arrival - nowSeconds();
+    void getApiKey().then((apiKey) => {
+      if (apiKey) this.landingConfirmer.check(action.id, apiKey, remaining, (travel) => this.onLandingConfirmed(action, settings, travel));
+    });
+
     if (remaining <= 0) {
       state.landed = true;
       const timer = this.ticks.get(action.id);
@@ -103,5 +110,21 @@ export class FlightStatus extends PollingAction<FlightSettings> {
     }
 
     void action.setImage(renderFlightProgressSvg({ destination: state.destination, departed: state.departed, arrival: state.arrival }));
+  }
+
+  /** Reconciles the local countdown with a fresh (non-cached) check made as landing nears. */
+  private onLandingConfirmed(action: KeyAction<FlightSettings>, settings: FlightSettings, travel: TornTravel): void {
+    const state = this.states.get(action.id);
+    if (!state || state.landed) return;
+
+    if (travel.timeLeft <= 0) {
+      state.landed = true;
+      const timer = this.ticks.get(action.id);
+      if (timer) clearInterval(timer);
+      this.ticks.delete(action.id);
+      this.blink.set(action, renderFlightLandedSvg(state.destination, false), renderFlightLandedSvg(state.destination, true), flashEnabledOf(settings));
+    } else {
+      state.arrival = nowSeconds() + travel.timeLeft;
+    }
   }
 }

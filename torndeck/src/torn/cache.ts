@@ -11,13 +11,16 @@ const inFlight = new Map<string, Promise<unknown>>();
  * `ttlMs` of each other (e.g. Stats, Chain, and Notifications all needing the `bars`/`notifications`
  * selections) share one real HTTP request instead of each firing their own - and concurrent callers
  * for the same still-in-flight request share that one promise rather than double-fetching.
+ * `force` bypasses a still-fresh cache entry (but still joins an already-in-flight request).
  */
-export function cached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
+export function cached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>, force = false): Promise<T> {
   const now = Date.now();
 
-  const entry = cache.get(key) as CacheEntry<T> | undefined;
-  if (entry && entry.expiresAt > now) {
-    return Promise.resolve(entry.value);
+  if (!force) {
+    const entry = cache.get(key) as CacheEntry<T> | undefined;
+    if (entry && entry.expiresAt > now) {
+      return Promise.resolve(entry.value);
+    }
   }
 
   const pending = inFlight.get(key) as Promise<T> | undefined;

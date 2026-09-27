@@ -1,12 +1,13 @@
 import streamDeck, { action, KeyAction } from "@elgato/streamdeck";
 import { flashEnabledOf, PollingAction } from "../lib/polling-action";
 import { BlinkController } from "../lib/blink";
-import { fetchTornStatus, fetchTornTravel, TornApiError } from "../torn/api";
+import { fetchTornStatus, fetchTornTravel, TornApiError, TornTravel } from "../torn/api";
 import { getApiKey } from "../torn/settings";
 import { nowSeconds } from "../torn/clock";
 import { isAbroad, renderFlightAbroadSvg, renderFlightLandedSvg, renderFlightProgressSvg } from "../torn/render-flight";
 import { renderStatusStaticSvg, renderTimerSvg, TimerKind } from "../torn/render-status";
 import { withTct } from "../torn/render-tct";
+import { LandingConfirmer } from "../lib/landing-confirm";
 
 type StatusSettings = {
   /** Start flashing once this many minutes are left in hospital/jail. */
@@ -33,6 +34,7 @@ export class Status extends PollingAction<StatusSettings> {
   private readonly modes = new Map<string, Mode>();
   private readonly ticks = new Map<string, ReturnType<typeof setInterval>>();
   private readonly blink = new BlinkController();
+  private readonly landingConfirmer = new LandingConfirmer();
 
   /** Adds the small TCT time to a rendered card when the user has that option on. */
   private img(settings: StatusSettings, uri: string, flash = false): string {
@@ -42,6 +44,7 @@ export class Status extends PollingAction<StatusSettings> {
   protected override onStop(actionId: string): void {
     this.stopTicking(actionId);
     this.blink.stop(actionId);
+    this.landingConfirmer.stop(actionId);
     this.modes.delete(actionId);
   }
 
@@ -126,7 +129,12 @@ export class Status extends PollingAction<StatusSettings> {
 
     if (mode.kind === "flight") {
       if (mode.landed) return;
-      if (mode.arrival - nowSeconds() <= 0) {
+      const remaining = mode.arrival - nowSeconds();
+      void getApiKey().then((apiKey) => {
+        if (apiKey) this.landingConfirmer.check(action.id, apiKey, remaining, (travel) => this.onLandingConfirmed(action, settings, travel));
+      });
+
+      if (remaining <= 0) {
         mode.landed = true;
         this.stopTicking(action.id);
         this.blink.set(action, this.img(settings, renderFlightLandedSvg(mode.destination, false)), this.img(settings, renderFlightLandedSvg(mode.destination, true), true), flashEnabledOf(settings));
@@ -151,6 +159,20 @@ export class Status extends PollingAction<StatusSettings> {
     } else {
       this.blink.reset(action.id);
       void action.setImage(this.img(settings, renderTimerSvg(mode.kind, remaining, false, mode.country)));
+    }
+  }
+
+  /** Reconciles the local countdown with a fresh (non-cached) check made as landing nears. */
+  private onLandingConfirmed(action: KeyAction<StatusSettings>, settings: StatusSettings, travel: TornTravel): void {
+    const mode = this.modes.get(action.id);
+    if (!mode || mode.kind !== "flight" || mode.landed) return;
+
+    if (travel.timeLeft <= 0) {
+      mode.landed = true;
+      this.stopTicking(action.id);
+      this.blink.set(action, this.img(settings, renderFlightLandedSvg(mode.destination, false)), this.img(settings, renderFlightLandedSvg(mode.destination, true), true), flashEnabledOf(settings));
+    } else {
+      mode.arrival = nowSeconds() + travel.timeLeft;
     }
   }
 }
